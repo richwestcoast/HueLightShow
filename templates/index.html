@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hue Light Show Controller</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <!-- Theme toggle button -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+    
+    <!-- Opacity slider -->
+    <div class="opacity-container">
+        <span class="opacity-label">Opacity: <span id="opacityValue">100%</span></span>
+        <input type="range" id="opacitySlider" class="opacity-slider" min="0" max="100" value="100">
+    </div>
+    
+    <div class="app-wrapper">
+        <div class="container">
+        <header>
+            <h1>Hue Light Show Controller</h1>
+        </header>
+
+        <div class="status-panel">
+            <div class="color-preview" id="colorPreview"></div>
+            <div class="status-info">
+                <div class="status-row">
+                    <span class="status-label">Status:</span>
+                    <span class="status-value" id="statusValue">Stopped</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Current Color:</span>
+                    <span class="status-value" id="currentColor">#FFFFFF</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">Brightness:</span>
+                    <span class="status-value" id="currentBrightness">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="control-buttons">
+                <button id="startBtn" class="btn btn-start">Start</button>
+                <button id="pauseBtn" class="btn btn-pause" disabled>Pause</button>
+                <button id="stopBtn" class="btn btn-stop" disabled>Stop</button>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <h2>Brightness Range</h2>
+            <div class="brightness-range">
+                <div class="range-control">
+                    <label for="minBrightness">Minimum Brightness: <span id="minBrightnessValue">50%</span></label>
+                    <input type="range" id="minBrightness" min="0" max="100" value="50" class="slider">
+                </div>
+                <div class="range-control">
+                    <label for="maxBrightness">Maximum Brightness: <span id="maxBrightnessValue">100%</span></label>
+                    <input type="range" id="maxBrightness" min="0" max="100" value="100" class="slider">
+                </div>
+                <button id="applyRangeBtn" class="btn">Apply Range</button>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <h2>Speed Settings</h2>
+            <div class="speed-settings">
+                <div class="range-control">
+                    <label for="transitionTime">Transition Time: <span id="transitionTimeValue">2s</span></label>
+                    <input type="range" id="transitionTime" min="0.1" max="10" step="0.1" value="2" class="slider">
+                    <div class="range-description">How long each color transition takes (lower = faster transitions)</div>
+                </div>
+                <div class="range-control">
+                    <label for="fullCycleTime">Full Cycle Time: <span id="fullCycleTimeValue">30s</span></label>
+                    <input type="range" id="fullCycleTime" min="5" max="300" step="5" value="30" class="slider">
+                    <div class="range-description">Time to complete a full color cycle (lower = faster overall speed)</div>
+                </div>
+                <button id="applySpeedBtn" class="btn">Apply Speed</button>
+            </div>
+        </div>
+
+        <div class="lights-panel" id="lightsPanel">
+            <h2>Select Lights</h2>
+            <p class="lights-info">Choose which lights to include in the light show:</p>
+            <div class="lights-container" id="lightsContainer">
+                <!-- Lights will be added here dynamically -->
+                <div class="loading-lights">Loading lights...</div>
+            </div>
+            <button id="applyLightsBtn" class="btn">Apply Selection</button>
+        </div>
+
+        <div class="manual-control-panel" id="manualControlPanel">
+            <h2>Manual Color Control</h2>
+            <p class="manual-control-info">Pause the light show to manually select a color</p>
+            
+            <div class="color-control">
+                <div class="control-row">
+                    <label for="hueSlider">Hue: <span id="hueValue">0°</span></label>
+                    <input type="range" id="hueSlider" min="0" max="360" value="0" class="slider" disabled>
+                </div>
+                <div class="control-row">
+                    <label for="brightnessSlider">Brightness: <span id="brightnessValue">100%</span></label>
+                    <input type="range" id="brightnessSlider" min="0" max="100" value="100" class="slider" disabled>
+                </div>
+                <div class="control-row">
+                    <label for="saturationSlider">Saturation: <span id="saturationValue">100%</span></label>
+                    <input type="range" id="saturationSlider" min="0" max="100" value="100" class="slider" disabled>
+                </div>
+                <button id="applyColorBtn" class="btn" disabled>Apply Color</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
