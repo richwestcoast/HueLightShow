@@ -46,6 +46,9 @@ min_brightness = DEFAULT_MIN_BRIGHTNESS
 max_brightness = DEFAULT_MAX_BRIGHTNESS
 transition_time = TRANSITION_TIME
 full_cycle_time = FULL_CYCLE_TIME
+current_theme = "rainbow"  # Default theme
+hue_start = 0  # Default hue range start (0-360)
+hue_end = 360  # Default hue range end (0-360)
 
 
 def get_bridge_connection():
@@ -279,12 +282,14 @@ def run_light_show():
     
     logger.info(f"Starting color fade effect on {len(selected_lights)} lights. Control via web interface at http://localhost:3000")
     logger.info(f"Speed settings: Transition time = {transition_time}s, Full cycle time = {full_cycle_time}s")
+    logger.info(f"Theme: {current_theme} (Hue range: {hue_start}° - {hue_end}°)")
     
     # Calculate how many steps we need for a smooth transition
     total_steps = 360  # Using hue values from 0-360 (HSV color model)
     step_time = full_cycle_time / total_steps
     
     current_step = 0
+    hue_range = hue_end - hue_start
     
     try:
         while light_show_running:
@@ -306,8 +311,13 @@ def run_light_show():
                     except Exception as e:
                         logger.error(f"Error turning on light {light_id}: {e}")
                 
-                # Calculate the current hue value (0-360)
-                current_hue = current_step % 360
+                # Calculate the current hue value based on the theme's hue range
+                if hue_range == 0:  # Handle case where start and end are the same
+                    current_hue = hue_start
+                else:
+                    # Map the current step (0-359) to the theme's hue range
+                    progress = (current_step % 360) / 360.0
+                    current_hue = hue_start + (progress * hue_range)
                 
                 # Calculate brightness based on min/max settings
                 # We'll use a sine wave to smoothly transition between min and max brightness
@@ -369,7 +379,10 @@ def emit_state():
         'transition_time': transition_time,
         'full_cycle_time': full_cycle_time,
         'lights': lights_info,
-        'selected_lights': selected_lights
+        'selected_lights': selected_lights,
+        'theme': current_theme,
+        'hue_start': hue_start,
+        'hue_end': hue_end
     }
     socketio.emit('state_update', state)
 
@@ -463,6 +476,33 @@ def set_speed(transition_time_value, full_cycle_time_value):
     full_cycle_time = max(5, min(300, full_cycle_time_value))
     
     logger.info(f"Speed set: Transition time = {transition_time}s, Full cycle time = {full_cycle_time}s")
+    emit_state()
+
+
+def set_theme(theme_name, hue_start_value, hue_end_value):
+    """Set the color theme for the light show."""
+    global current_theme, hue_start, hue_end
+    
+    # Validate theme name
+    valid_themes = ["rainbow", "warm", "cold", "forest", "sunset", "ocean", "funky"]
+    if theme_name not in valid_themes:
+        logger.warning(f"Invalid theme name: {theme_name}. Using default 'rainbow' theme.")
+        theme_name = "rainbow"
+    
+    # Validate hue range (0-360)
+    hue_start_value = max(0, min(360, hue_start_value))
+    hue_end_value = max(0, min(360, hue_end_value))
+    
+    # Ensure hue_start is less than hue_end
+    if hue_start_value > hue_end_value:
+        hue_start_value, hue_end_value = hue_end_value, hue_start_value
+    
+    # Set the theme
+    current_theme = theme_name
+    hue_start = hue_start_value
+    hue_end = hue_end_value
+    
+    logger.info(f"Theme set: {current_theme} (Hue range: {hue_start}° - {hue_end}°)")
     emit_state()
 
 
@@ -592,6 +632,22 @@ def handle_set_speed(data):
     full_cycle_time_value = data.get('full_cycle_time', FULL_CYCLE_TIME)
     set_speed(transition_time_value, full_cycle_time_value)
     return {'status': 'success'}
+
+
+@socketio.on('set_theme')
+def handle_set_theme(data):
+    """Handle set theme event."""
+    theme = data.get('theme', 'rainbow')
+    hue_start_value = data.get('hue_start', 0)
+    hue_end_value = data.get('hue_end', 360)
+    
+    # Log the theme change request
+    logger.info(f"Received theme change request: {theme} (Hue range: {hue_start_value}° - {hue_end_value}°)")
+    
+    # Apply the theme
+    set_theme(theme, hue_start_value, hue_end_value)
+    
+    return {'status': 'success', 'message': f"Theme set to {theme}"}
 
 
 def main():

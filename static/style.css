@@ -287,6 +287,109 @@ h1 {
     margin-top: 15px;
 }
 
+/* Theme Settings */
+.theme-settings {
+    margin-top: 15px;
+}
+
+.theme-description {
+    margin-bottom: 15px;
+    color: var(--secondary-text);
+    transition: color 0.3s ease;
+}
+
+.theme-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.theme-option {
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+.theme-option:hover {
+    transform: scale(1.05);
+}
+
+.theme-option.selected {
+    transform: scale(1.1);
+}
+
+.theme-option.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: var(--slider-thumb);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.theme-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px var(--panel-shadow);
+    overflow: hidden;
+    position: relative;
+}
+
+.theme-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Theme preview gradients */
+.rainbow-preview {
+    background: linear-gradient(to right,
+        #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+}
+
+.warm-preview {
+    background: linear-gradient(to right,
+        #ff0000, #ff4000, #ff8000, #ffbf00, #ffff00);
+}
+
+.cold-preview {
+    background: linear-gradient(to right,
+        #00ffff, #00bfff, #0080ff, #0040ff, #0000ff);
+}
+
+.forest-preview {
+    background: linear-gradient(to right,
+        #00ff00, #00cc00, #009900, #006600, #003300);
+}
+
+.sunset-preview {
+    background: linear-gradient(to right,
+        #ff0000, #ff3300, #ff6600, #ff9900, #ffcc00);
+}
+
+.ocean-preview {
+    background: linear-gradient(to right,
+        #006994, #0099cc, #00ccff, #33ccff, #66ccff);
+}
+
+.funky-preview {
+    background: linear-gradient(to right,
+        #cc00cc, #9900ff, #cc00ff, #ff00cc, #ff0099);
+}
+
 /* Lights Panel */
 .lights-info {
     margin-bottom: 15px;

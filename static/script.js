@@ -36,11 +36,15 @@ const manualControlPanel = document.getElementById('manualControlPanel');
 const lightsContainer = document.getElementById('lightsContainer');
 const applyLightsBtn = document.getElementById('applyLightsBtn');
 
+const themeOptions = document.getElementById('themeOptions');
+const applyThemeBtn = document.getElementById('applyThemeBtn');
+
 // State variables
 let isRunning = false;
 let isPaused = false;
 let availableLights = {};
 let selectedLights = [];
+let selectedTheme = 'rainbow'; // Default theme
 
 // Event Listeners
 startBtn.addEventListener('click', () => {
@@ -85,6 +89,45 @@ applySpeedBtn.addEventListener('click', () => {
     socket.emit('set_speed', {
         transition_time: transitionTimeValue,
         full_cycle_time: fullCycleTimeValue
+    });
+});
+
+// Theme selection
+themeOptions.addEventListener('click', (event) => {
+    // Find the clicked theme option or its parent
+    const themeOption = event.target.closest('.theme-option');
+    if (!themeOption) return;
+    
+    // Remove selected class from all options
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    themeOption.classList.add('selected');
+    
+    // Store the selected theme
+    selectedTheme = themeOption.dataset.theme;
+    
+    console.log(`Selected theme: ${selectedTheme}`);
+});
+
+applyThemeBtn.addEventListener('click', () => {
+    // Find the selected theme option
+    const selectedOption = document.querySelector('.theme-option.selected') ||
+                          document.querySelector('.theme-option[data-theme="rainbow"]');
+    
+    // Get the hue range from the selected theme
+    const hueStart = parseInt(selectedOption.dataset.hueStart);
+    const hueEnd = parseInt(selectedOption.dataset.hueEnd);
+    
+    console.log(`Applying theme: ${selectedOption.dataset.theme} (${hueStart}° - ${hueEnd}°)`);
+    
+    // Send the theme to the server
+    socket.emit('set_theme', {
+        theme: selectedOption.dataset.theme,
+        hue_start: hueStart,
+        hue_end: hueEnd
     });
 });
 
@@ -272,6 +315,22 @@ socket.on('state_update', (state) => {
         hueValue.textContent = `${state.hue}°`;
         brightnessValue.textContent = `${state.brightness}%`;
         saturationValue.textContent = `${state.saturation}%`;
+    }
+    
+    // Update theme selection if available
+    if (state.theme) {
+        // Find the theme option with the matching theme name
+        const themeOption = document.querySelector(`.theme-option[data-theme="${state.theme}"]`);
+        if (themeOption) {
+            // Remove selected class from all options
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to the matching option
+            themeOption.classList.add('selected');
+            selectedTheme = state.theme;
+        }
     }
 });
 
